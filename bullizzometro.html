@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bullizzometro – Identifica e Ferma il Bullismo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --yellow: #FFD93D;
+    --orange: #FF922B;
+    --red: #FA5252;
+    --green: #51CF66;
+    --blue: #339AF0;
+    --purple: #845EF7;
+    --bg: #F0F4FF;
+    --card: #FFFFFF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --shadow: 0 8px 32px rgba(60,60,120,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BG BLOBS ── */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    width: 500px; height: 500px;
+    background: var(--purple);
+    top: -150px; left: -150px;
+  }
+  body::after {
+    width: 400px; height: 400px;
+    background: var(--orange);
+    bottom: -100px; right: -100px;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 32px 0 16px;
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--text);
+    color: #fff;
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .logo-badge .dot {
+    width: 8px; height: 8px;
+    background: var(--yellow);
+    border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1.5); opacity:.6; }
+  }
+  h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(2rem, 7vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  h1 span { color: var(--purple); }
+  .subtitle {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: var(--muted);
+    font-weight: 600;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    margin: 28px 0 20px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar-track {
+    background: #E2E8F0;
+    border-radius: 20px;
+    height: 12px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 32px 28px;
+    animation: cardIn 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes cardIn {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* ── QUESTION ── */
+  .question-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .question-label {
+    display: inline-block;
+    background: var(--bg);
+    color: var(--purple);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 8px;
+    padding: 4px 12px;
+    margin-bottom: 14px;
+  }
+  .question-text {
+    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+    font-weight: 800;
+    line-height: 1.45;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  /* ── OPTIONS ── */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--bg);
+    border: 2.5px solid transparent;
+    border-radius: 16px;
+    padding: 16px 18px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    text-align: left;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn:hover {
+    border-color: var(--purple);
+    background: #F3EEFF;
+    transform: translateX(4px);
+  }
+  .option-btn.selected {
+    border-color: var(--purple);
+    background: #F3EEFF;
+    transform: translateX(4px);
+  }
+  .option-btn .opt-circle {
+    min-width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2.5px solid #D1D5DB;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+    font-weight: 900;
+  }
+  .option-btn.selected .opt-circle {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+  }
+  .option-btn .opt-label { flex: 1; }
+
+  /* ── NAV ── */
+  .nav-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    justify-content: flex-end;
+  }
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(132,94,247,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(132,94,247,0.45); }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 2px solid #E2E8F0;
+  }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+
+  /* ── RESULT ── */
+  .result-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .result-emoji {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+  }
+  .result-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+  .level-0  { background: #ECFDF5; color: #059669; }
+  .level-1  { background: #FFFBEB; color: #D97706; }
+  .level-2  { background: #FFF7ED; color: #EA580C; }
+  .level-3  { background: #FFF1F2; color: #E11D48; }
+
+  .result-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    max-width: 480px;
+    margin: 0 auto 24px;
+    line-height: 1.6;
+  }
+
+  /* ── BEHAVIORS LIST ── */
+  .behaviors-section {
+    background: var(--bg);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .behaviors-section h3 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .behavior-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 2px solid #E2E8F0;
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 4px;
+    color: var(--text);
+  }
+
+  /* ── ADVICE CARD ── */
+  .advice-card {
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .advice-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    opacity: 0.12;
+    background: currentColor;
+  }
+  .advice-yellow { background: #FFFBEB; border: 2px solid #FDE68A; color: #D97706; }
+  .advice-orange { background: #FFF7ED; border: 2px solid #FDBA74; color: #EA580C; }
+  .advice-red    { background: #FFF1F2; border: 2px solid #FCA5A5; color: #E11D48; }
+  .advice-green  { background: #ECFDF5; border: 2px solid #6EE7B7; color: #059669; }
+
+  .advice-card .advice-icon { font-size: 2rem; margin-bottom: 10px; }
+  .advice-card .advice-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .advice-card .advice-body {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .call-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--text);
+    color: #fff;
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-top: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* ── CONTACTS GRID ── */
+  .contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .contact-tile {
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .contact-tile .ct-num {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: block;
+  }
+  .contact-tile .ct-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ct-green { background: #ECFDF5; color: #059669; }
+  .ct-orange { background: #FFF7ED; color: #EA580C; }
+  .ct-red { background: #FFF1F2; color: #E11D48; }
+
+  /* ── RESTART ── */
+  .restart-row {
+    text-align: center;
+    margin-top: 28px;
+  }
+  .btn-restart {
+    background: var(--text);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-restart:hover { transform: translateY(-2px); background: #2D2D4E; }
+
+  /* ── SCREEN: WELCOME ── */
+  .welcome-card {
+    text-align: center;
+    padding: 40px 28px;
+  }
+  .welcome-card .big-emoji { font-size: 5rem; margin-bottom: 16px; display: block; }
+  .welcome-card h2 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .welcome-card p {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 28px;
+  }
+  .level-legend {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .legend-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── SCREEN NOT BULLYING ── */
+  .not-bully-card { text-align: center; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid #E2E8F0;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .bounce { animation: bounce 2s ease-in-out infinite; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:480px) {
+    .card { padding: 24px 18px; }
+    .welcome-card { padding: 28px 16px; }
+    .nav-row { justify-content: stretch; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="logo-badge"><span class="dot"></span> Progetto Scuola</div>
+    <h1>Bulli<span>zzometro</span></h1>
+    <p class="subtitle">Riconosci il bullismo e scopri cosa fare</p>
+  </header>
+
+  <main id="app"></main>
+
+  <footer>
+    Realizzato per le classi 5ª Primaria e 1ª Secondaria &nbsp;·&nbsp; In caso di emergenza chiama sempre il <strong>112</strong>
+  </footer>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+const questions = [
+  {
+    id: 1,
+    icon: "👥",
+    category: "Isolamento",
+    text: "Ti è mai capitato che i tuoi compagni ti escludano dal gruppo o facciano finta che tu non esista?",
+    options: [
+      { text: "Sì, succede spesso", value: 1 },
+      { text: "Qualche volta, ma non sempre", value: 1 },
+      { text: "No, non mi è mai capitato", value: 0 },
+    ]
+  },
+  {
+    id: 2,
+    icon: "😔",
+    category: "Umiliazione",
+    text: "Qualcuno ti prende in giro, ti fa dispetti o cerca pretesti per litigare con te davanti agli altri?",
+    options: [
+      { text: "Sì, regolarmente", value: 1 },
+      { text: "A volte succede", value: 1 },
+      { text: "No, mai", value: 0 },
+    ]
+  },
+  {
+    id: 3,
+    icon: "📱",
+    category: "Online",
+    text: "Qualcuno ha condiviso foto o video tuoi su internet o nelle chat senza il tuo permesso, oppure ti manda messaggi offensivi online?",
+    options: [
+      { text: "Sì, è successo", value: 2 },
+      { text: "Mi hanno fatto pressione per sfide online", value: 2 },
+      { text: "No, niente di tutto questo", value: 0 },
+    ]
+  },
+  {
+    id: 4,
+    icon: "🎒",
+    category: "Oggetti personali",
+    text: "Qualcuno ha distrutto, rubato o nascosto le tue cose (zaino, materiale scolastico, telefono…)?",
+    options: [
+      { text: "Sì, mi è capitato", value: 2 },
+      { text: "Ci hanno provato", value: 2 },
+      { text: "No, mai", value: 0 },
+    ]
+  },
+  {
+    id: 5,
+    icon: "💢",
+    category: "Violenza fisica",
+    text: "Ti hanno mai spinto, strattonato, dato calci o colpi fisici in modo intenzionale?",
+    options: [
+      { text: "Sì, è successo più volte", value: 2 },
+      { text: "Una volta sola", value: 2 },
+      { text: "No, mai", value: 0 },
+    ]
+  },
+  {
+    id: 6,
+    icon: "😨",
+    category: "Coercizione",
+    text: "Qualcuno ti ha obbligato a fare cose che non volevi fare, o ti ha minacciato con oggetti pericolosi?",
+    options: [
+      { text: "Sì, mi hanno costretto", value: 3 },
+      { text: "Mi hanno minacciato", value: 3 },
+      { text: "No, mai", value: 0 },
+    ]
+  },
+  {
+    id: 7,
+    icon: "💔",
+    category: "Pensieri difficili",
+    text: "Hai mai pensato di farti del male o di non avere via d'uscita da una situazione?",
+    options: [
+      { text: "Sì, ci ho pensato", value: 3 },
+      { text: "A volte mi sento così", value: 3 },
+      { text: "No, non mi è mai capitato", value: 0 },
+    ]
+  },
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  screen: 'welcome',   // welcome | quiz | result
+  current: 0,
+  answers: [],         // { qIndex, value }
+  maxLevel: 0,
+};
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function render() {
+  const app = document.getElementById('app');
+  if (state.screen === 'welcome') app.innerHTML = renderWelcome();
+  else if (state.screen === 'quiz') app.innerHTML = renderQuiz();
+  else app.innerHTML = renderResult();
+  attachEvents();
+}
+
+// ── WELCOME ──
+function renderWelcome() {
+  return `
+  <div class="card welcome-card">
+    <span class="big-emoji bounce">🛡️</span>
+    <h2>Ciao! Sei nel posto giusto.</h2>
+    <p>Questo strumento ti aiuta a capire se stai vivendo una situazione di bullismo e ti indica cosa puoi fare per uscirne.<br><br>
+    Rispondi con sincerità: le tue risposte sono private.</p>
+    <div class="level-legend">
+      <span class="legend-pill" style="background:#FFFBEB;color:#D97706"><span class="legend-dot" style="background:#F59E0B"></span>Segnali di allerta</span>
+      <span class="legend-pill" style="background:#FFF7ED;color:#EA580C"><span class="legend-dot" style="background:#F97316"></span>Escalation</span>
+      <span class="legend-pill" style="background:#FFF1F2;color:#E11D48"><span class="legend-dot" style="background:#F43F5E"></span>Emergenza</span>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()" style="font-size:1.1rem;padding:16px 36px;">
+      Inizia il Quiz ✨
+    </button>
+  </div>`;
+}
+
+// ── QUIZ ──
+function renderQuiz() {
+  const q = questions[state.current];
+  const total = questions.length;
+  const pct = Math.round((state.current / total) * 100);
+  const answered = state.answers.find(a => a.qIndex === state.current);
+
+  return `
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>Domanda ${state.current + 1} di ${total}</span>
+      <span>${pct}% completato</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" style="width:${pct}%"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="question-icon">${q.icon}</div>
+    <span class="question-label">${q.category}</span>
+    <p class="question-text">${q.text}</p>
+    <div class="options">
+      ${q.options.map((opt, i) => `
+        <button class="option-btn ${answered && answered.optIndex === i ? 'selected' : ''}"
+                data-q="${state.current}" data-i="${i}" data-v="${opt.value}">
+          <span class="opt-circle">${answered && answered.optIndex === i ? '✓' : String.fromCharCode(65+i)}</span>
+          <span class="opt-label">${opt.text}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div class="nav-row">
+      ${state.current > 0 ? `<button class="btn btn-ghost" onclick="goBack()">← Indietro</button>` : ''}
+      <button class="btn btn-primary" id="nextBtn" onclick="goNext()" ${answered ? '' : 'disabled'}>
+        ${state.current < total - 1 ? 'Avanti →' : 'Vedi il risultato 🔍'}
+      </button>
+    </div>
+  </div>`;
+}
+
+// ── RESULT ──
+function renderResult() {
+  const level = state.maxLevel;
+
+  if (level === 0) {
+    return `
+    <div class="card not-bully-card">
+      <div class="result-header">
+        <span class="result-emoji">🎉</span>
+        <span class="level-badge level-0">✅ Nessun segnale di bullismo</span>
+        <h2 class="result-title">Ottimo! Sembra che tu stia bene.</h2>
+        <p class="result-desc">
+          Dalle tue risposte non emergono situazioni di bullismo. Questo è fantastico!<br><br>
+          Ricorda però: se un giorno qualcosa dovesse cambiare, sai che puoi parlare con un adulto di cui ti fidi — un genitore, un insegnante o un amico.
+        </p>
+      </div>
+      <div class="advice-card advice-green">
+        <div class="advice-icon">💬</div>
+        <div class="advice-title">Rimani curioso e aperto</div>
+        <div class="advice-body">
+          Se vedi che qualcun altro viene trattato male, non restare in silenzio. Diventare un testimone attivo è il primo passo per fermare il bullismo nella tua scuola.
+        </div>
+      </div>
+      <div class="restart-row">
+        <button class="btn-restart" onclick="restart()">🔄 Ricomincia il quiz</button>
+      </div>
+    </div>`;
+  }
+
+  const configs = {
+    1: {
+      emoji: "⚠️",
+      badge: "level-1",
+      badgeText: "⚠️ Livello 1 – Segnali di allerta",
+      title: "Attenzione: qualcosa non va",
+      desc: "Stai vivendo situazioni di isolamento o umiliazione. Non si tratta di scherzi normali: questi comportamenti possono essere i primi segnali del bullismo. È importante agire subito.",
+      adviceClass: "advice-yellow",
+      adviceIcon: "🗣️",
+      adviceTitle: "Parla con qualcuno di cui ti fidi",
+      adviceBody: `Il primo passo più importante è <strong>non stare in silenzio</strong>. Confidati con:<br>
+        <br>👫 Un amico fidato<br>
+        👨‍👩‍👧 I tuoi genitori o un familiare<br>
+        👩‍🏫 Un insegnante o il preside<br><br>
+        Parlare non è fare la spia: è prendersi cura di sé.`,
+      contactsHtml: `
+        <div class="contacts-grid">
+          <div class="contact-tile ct-green">
+            <span class="ct-num">👨‍👩‍👧</span>
+            <span class="ct-label">Parla con i tuoi genitori</span>
+          </div>
+          <div class="contact-tile ct-green">
+            <span class="ct-num">👩‍🏫</span>
+            <span class="ct-label">Rivolgiti a un insegnante</span>
+          </div>
+        </div>`
+    },
+    2: {
+      emoji: "🚨",
+      badge: "level-2",
+      badgeText: "🚨 Livello 2 – Molestie e Cyberbullismo",
+      title: "Questa situazione è seria",
+      desc: "Stai subendo comportamenti più gravi: pressioni online, messaggi offensivi, furto o danneggiamento di oggetti, o violenza fisica. Non devi affrontare tutto questo da solo.",
+      adviceClass: "advice-orange",
+      adviceIcon: "📞",
+      adviceTitle: "Chiama o scrivi al 114 – Emergenza Infanzia",
+      adviceBody: `Il <strong>114</strong> è un numero gratuito, attivo 24 ore su 24, dedicato ai bambini e ai ragazzi in difficoltà.<br><br>
+        Con l'aiuto dei tuoi genitori, valutate insieme se:<br>
+        📋 Denunciare il bullo<br>
+        📜 Richiedere l'ammonimento del bullo (una misura ufficiale)<br><br>
+        <strong>Documenta tutto</strong>: salva screenshot, messaggi, e annota date e luoghi.`,
+      contactsHtml: `
+        <div class="contacts-grid">
+          <div class="contact-tile ct-orange">
+            <span class="ct-num">114</span>
+            <span class="ct-label">Emergenza Infanzia (gratuito, 24h)</span>
+          </div>
+          <div class="contact-tile ct-green">
+            <span class="ct-num">👨‍👩‍👧</span>
+            <span class="ct-label">Genitori o adulto di fiducia</span>
+          </div>
+        </div>`
+    },
+    3: {
+      emoji: "🆘",
+      badge: "level-3",
+      badgeText: "🆘 Livello 3 – Emergenza",
+      title: "Hai bisogno di aiuto adesso",
+      desc: "Stai vivendo una situazione molto grave. Quello che descrivi è una violazione seria dei tuoi diritti e della tua sicurezza. Non sei solo/a e c'è chi può aiutarti subito.",
+      adviceClass: "advice-red",
+      adviceIcon: "🚔",
+      adviceTitle: "Chiama il 112 – Forze dell'Ordine",
+      adviceBody: `Chiama subito il <strong>112</strong> o fai chiamare un adulto di fiducia.<br><br>
+        Puoi anche recarti con un genitore presso:<br>
+        🏛️ Qualsiasi <strong>caserma dei Carabinieri</strong><br>
+        👮 Un <strong>commissariato di Polizia</strong><br><br>
+        <strong>La tua sicurezza viene prima di tutto.</strong> Non aspettare.`,
+      contactsHtml: `
+        <div class="contacts-grid">
+          <div class="contact-tile ct-red">
+            <span class="ct-num">112</span>
+            <span class="ct-label">Emergenza – Forze dell'Ordine</span>
+          </div>
+          <div class="contact-tile ct-orange">
+            <span class="ct-num">114</span>
+            <span class="ct-label">Emergenza Infanzia</span>
+          </div>
+          <div class="contact-tile ct-green">
+            <span class="ct-num">👨‍👩‍👧</span>
+            <span class="ct-label">Genitori o adulto di fiducia</span>
+          </div>
+        </div>`
+    }
+  };
+
+  const c = configs[level];
+
+  // Behaviors selected
+  const behaviors = [];
+  state.answers.forEach(a => {
+    if (a.value > 0) {
+      const q = questions[a.qIndex];
+      behaviors.push(`${q.icon} ${q.category}`);
+    }
+  });
+
+  return `
+  <div class="card">
+    <div class="result-header">
+      <span class="result-emoji">${c.emoji}</span>
+      <span class="level-badge ${c.badge}">${c.badgeText}</span>
+      <h2 class="result-title">${c.title}</h2>
+      <p class="result-desc">${c.desc}</p>
+    </div>
+
+    ${behaviors.length > 0 ? `
+    <div class="behaviors-section">
+      <h3>Situazioni che hai segnalato</h3>
+      ${behaviors.map(b => `<span class="behavior-tag">${b}</span>`).join('')}
+    </div>` : ''}
+
+    <div class="advice-card ${c.adviceClass}">
+      <div class="advice-icon">${c.adviceIcon}</div>
+      <div class="advice-title">${c.adviceTitle}</div>
+      <div class="advice-body">${c.adviceBody}</div>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <p style="font-size:0.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Contatti utili</p>
+      ${c.contactsHtml}
+    </div>
+
+    ${level === 3 ? `
+    <div class="advice-card advice-red" style="margin-top:16px;">
+      <div class="advice-icon">💙</div>
+      <div class="advice-title">Ricorda: non è colpa tua</div>
+      <div class="advice-body">
+        Qualunque cosa ti abbiano detto o fatto, non hai fatto nulla di sbagliato. Meriti rispetto, sicurezza e felicità. Gli adulti intorno a te ci tengono davvero a te.
+      </div>
+    </div>` : ''}
+
+    <div class="restart-row">
+      <button class="btn-restart" onclick="restart()">🔄 Ricomincia il quiz</button>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  EVENTS & LOGIC
+// ═══════════════════════════════════════════
+function attachEvents() {
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const qIdx = parseInt(btn.dataset.q);
+      const oIdx = parseInt(btn.dataset.i);
+      const val  = parseInt(btn.dataset.v);
+      // Save answer
+      state.answers = state.answers.filter(a => a.qIndex !== qIdx);
+      state.answers.push({ qIndex: qIdx, optIndex: oIdx, value: val });
+      // Update max level
+      state.maxLevel = Math.max(...state.answers.map(a => a.value));
+      render();
+    });
+  });
+}
+
+function startQuiz() {
+  state.screen = 'quiz';
+  state.current = 0;
+  state.answers = [];
+  state.maxLevel = 0;
+  render();
+}
+
+function goNext() {
+  if (state.current < questions.length - 1) {
+    state.current++;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    state.screen = 'result';
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goBack() {
+  if (state.current > 0) {
+    state.current--;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function restart() {
+  state = { screen: 'welcome', current: 0, answers: [], maxLevel: 0 };
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
